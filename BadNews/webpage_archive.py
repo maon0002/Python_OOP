@@ -35,11 +35,33 @@ class WebpageArchive(NewsWebsite):
     def check_response_status(self, source: requests) -> bool:
         return source.status_code == 200
 
-    def make_first_level_soup(self, source: requests) -> List[BeautifulSoup]:
+    def make_first_level_soup(self, source: requests) -> [List[str], List[str]]:
         source_text = source.text
         soup = BeautifulSoup(source_text, 'lxml')
-        soup_scope = soup.find_all(self.title_tag, {'class': self.title_class})  # ('a', {'class': 'title'})
-        return soup_scope
+        section = soup.find_all('div', class_='news-article-inline')
+        initial_data = self.get_first_level_data(section)
+
+        return initial_data
+
+    def get_first_level_data(self, section) -> List[List[str]]:
+        title_link_pairs = []
+
+        for i in range(len(section)):
+            element = section[i]
+            title = element.find(class_='title').text
+            link = element.a['href']
+            date = element.find(class_='date').text
+
+            if not link.startswith(self.url):
+                valid_link = self.url + link
+            else:
+                valid_link = link
+
+            pair_to_add = [title, valid_link]
+            title_link_pairs.append(pair_to_add)
+            print(pair_to_add)
+
+        return title_link_pairs
 
     def make_second_level_soup_time(self, column: [Series]) -> [Series]:  # `series.loc[i:j]`.
         link_list = column.to_list()
@@ -67,45 +89,9 @@ class WebpageArchive(NewsWebsite):
 
         return articles
 
-    def get_first_level_data(self, tags: List[BeautifulSoup]) -> List[List[str]]:
-        title_url_pairs = []
-        title_url_pairs.extend([[tags[i].string, tags[i]['href']] for i in range(len(tags))
-                                if tags[i]['href'].startswith(f"https://{self.name}")])
-
-        return title_url_pairs
-
-    #TODO --continue from here
+    # TODO --continue from here
     def add_location(self, articles: Series, df: DataFrame):
-        article_list = articles.to_list()
-        locations = []
-        # concat_location = "|".join(postal_codes_df['location'])
-        # filtered_location_series = articles.str.contains(concat_location, regex=True)
-
-
-        # df.loc[df['Article'].str.upper().contains(postal_codes_df['location']), 'Location'] = postal_codes_df['location']
-
-        locations = postal_codes_df['location']
-        article_series = df['Article'].str.upper()
-
-        test = locations.isin(article_series)
-
-        # df = df[locations.isin(article_series), 'Location'] = postal_codes_df['location']
-        if test:
-            print(test.bool())
-
-
-        # df.loc[~df['nickname'].str.len() < 1, 'concat_emp_company'] = df['nickname'].str[:] + "|" + df['company'].str[:]
-
-        # for article in article_list:
-        #     print(article)
-        #     article = article.upper()
-        #     print(article)
-
-            # articles.append(soup_scope.getText().replace("\n", ""))
-        # concat_first_lvl_keywords = "|".join(NewsWebsite.first_level_keywords)
-        # filtered_df = df.loc[(df['Title']).str.contains(concat_first_lvl_keywords, regex=True)]
-
-        return df
+        pass
 
     def filtered_titles_df(self, df) -> DataFrame:
         concat_first_lvl_keywords = "|".join(NewsWebsite.first_level_keywords)
@@ -130,12 +116,11 @@ class WebpageArchive(NewsWebsite):
             source = requests.get(self.start_page_url + str(page))
             is_200 = self.check_response_status(source)
 
-            if not is_200 or page > 5:
+            if not is_200 or page > 1:
                 # if not is_200:
                 break
 
-            tags = self.make_first_level_soup(source)
-            initial_data = self.get_first_level_data(tags)
+            initial_data = self.make_first_level_soup(source)
 
             NewsWebsite.first_level_data.extend(initial_data)
             page += 1
@@ -145,7 +130,7 @@ class WebpageArchive(NewsWebsite):
         # TODO add columns for date, location, article text
         df['Datetime'] = self.make_second_level_soup_time(df['URL'])
         df['Article'] = self.make_second_level_soup_article(df['URL'])
-        df['Location'] = self.add_location(df['Article'], df)
+        # df['Location'] = self.add_location(df['Article'], df)
         # df = self.add_location(df['Article'], df)
         return df
 
@@ -160,20 +145,24 @@ class WebpageArchive(NewsWebsite):
         pass
 
 
-news_bg = WebpageArchive("news.bg", "https://news.bg", "https://", "web news", "https://news.bg/bulgaria?page=",
+news_bg = WebpageArchive("news.bg", "https://news.bg", "https://", "Web news", "https://news.bg/bulgaria?page=",
                          "title", "a",
                          "article-text", "p",
                          "time", "p")
 
-# <div class="article-text" itemprop="articleBody">
+btvnovinite_bg = WebpageArchive("btvnovinite.bg", "https://btvnovinite.bg", "https://", "TV news",
+                                "https://btvnovinite.bg/bulgaria/?page=",
+                                "news-article-inline", "a",
+                                "article-body", "p",
+                                "date-time",
+                                "p")  # TODO to add url prefix empty string by default in case of missing prefix links
 
-# <p class="time" itemprop="datePublished" content="2023-03-05T10:07:50+02:00">
-#             05.03.2023 10:07:50
-#         </p>
+# df_news_bg = news_bg.crawling_through_pages()
+# print(df_news_bg.head(10))
 
-df_news_bg = news_bg.crawling_through_pages()
-print(df_news_bg.head(10))
+df_btvnovinite_bg = btvnovinite_bg.crawling_through_pages()
+print(df_btvnovinite_bg.head(10))
 
 # Create a Pandas Excel writer using XlsxWriter as the engine.
 with pd.ExcelWriter('DF_TEST.xlsx', engine='xlsxwriter') as ew:
-    df_news_bg.to_excel(r'D:\GIT_REPOS\News-website-scraping\export_dataframe.xlsx', index=False)
+    df_news_bg.to_excel(r'D:\GIT_REPOS\Python_OOP\BadNews\export_dataframe.xlsx', index=False)
