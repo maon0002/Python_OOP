@@ -1,7 +1,7 @@
 import re
 import pyperclip
 
-text = '''                     04. Hotel Rooms
+text = '''                     02. Image Area
 
 
 
