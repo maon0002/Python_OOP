@@ -1,7 +1,8 @@
 import re
 import pyperclip
 
-text = '''                     02. Image Area
+text = '''                    06. Formula 1 Manager
+
 
 
 

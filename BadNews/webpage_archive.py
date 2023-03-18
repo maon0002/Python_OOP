@@ -20,7 +20,8 @@ class WebpageArchive(NewsWebsite):
     """
 
     def __init__(self, name: str, url: str, protocol: str, media_type: str, start_page_url: str,
-                 title_class: str, title_tag: str, article_class: str, article_tag: str,
+                 title_class: str, title_tag: str,
+                 article_class: str, article_tag: str,
                  datetime_class: str, datetime_tag: str, ):
         super().__init__(name, url, protocol)
         self.media_type = media_type
@@ -38,7 +39,7 @@ class WebpageArchive(NewsWebsite):
     def make_first_level_soup(self, source: requests) -> [List[str], List[str]]:
         source_text = source.text
         soup = BeautifulSoup(source_text, 'lxml')
-        section = soup.find_all('div', class_='news-article-inline')
+        section = soup.find_all(class_=self.title_class)  # ('div', class_='news-article-inline')  //"div" or "a",
         initial_data = self.get_first_level_data(section)
 
         return initial_data
@@ -48,9 +49,9 @@ class WebpageArchive(NewsWebsite):
 
         for i in range(len(section)):
             element = section[i]
-            title = element.find(class_='title').text
+            title = element.find(class_=self.title_tag).text
             link = element.a['href']
-            date = element.find(class_='date').text
+            # date = element.find(class_='date').text
 
             if not link.startswith(self.url):
                 valid_link = self.url + link
@@ -102,7 +103,7 @@ class WebpageArchive(NewsWebsite):
         init_df = pd.DataFrame(scrapped_data, columns=['Title', 'URL'])
         init_df['Source'] = self.name
         init_df['Type'] = self.media_type
-
+        # TODO add here function call for crawling through articles
         # init_df['Article'] = ''
 
         data_after_filtering = self.filtered_titles_df(init_df)
@@ -122,7 +123,7 @@ class WebpageArchive(NewsWebsite):
 
             initial_data = self.make_first_level_soup(source)
 
-            NewsWebsite.first_level_data.extend(initial_data)
+            self.first_level_data.extend(initial_data)
             page += 1
 
         df = self.create_df(NewsWebsite.first_level_data)
@@ -142,19 +143,22 @@ class WebpageArchive(NewsWebsite):
         pass
 
     def __repr__(self):
-        pass
+        return f"name is :{self.name} with url: {self.start_page_url}---------------------" \
+               f"titles with links are: {NewsWebsite.first_level_data}"
 
 
 news_bg = WebpageArchive("news.bg", "https://news.bg", "https://", "Web news", "https://news.bg/bulgaria?page=",
-                         "title", "a",
-                         "article-text", "p",
-                         "time", "p")
+                         "topic", "title",  # "title", "a",    ## title_class: str, title_tag: str,
+                         "article-text", "p",             ## article_class: str, article_tag: str,
+                         "time", "p")                     ## datetime_class: str, datetime_tag: str,
+
+
 
 btvnovinite_bg = WebpageArchive("btvnovinite.bg", "https://btvnovinite.bg", "https://", "TV news",
                                 "https://btvnovinite.bg/bulgaria/?page=",
-                                "news-article-inline", "a",
-                                "article-body", "p",
-                                "date-time",
+                                "news-article-inline", "title",  ## title_class: str, title_tag: str,
+                                "article-body", "p",         ## article_class: str, article_tag: str,
+                                "date-time",                 ## datetime_class: str, datetime_tag: str,
                                 "p")  # TODO to add url prefix empty string by default in case of missing prefix links
 
 # df_news_bg = news_bg.crawling_through_pages()
@@ -165,4 +169,5 @@ print(df_btvnovinite_bg.head(10))
 
 # Create a Pandas Excel writer using XlsxWriter as the engine.
 with pd.ExcelWriter('DF_TEST.xlsx', engine='xlsxwriter') as ew:
-    df_news_bg.to_excel(r'D:\GIT_REPOS\Python_OOP\BadNews\export_dataframe.xlsx', index=False)
+    # df_news_bg.to_excel(r'D:\GIT_REPOS\Python_OOP\BadNews\export_dataframe.xlsx', index=False)
+    df_btvnovinite_bg.to_excel(r'D:\GIT_REPOS\Python_OOP\BadNews\export_dataframe.xlsx', index=False)
