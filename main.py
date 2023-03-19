@@ -1,7 +1,7 @@
 import re
 import pyperclip
 
-text = '''                   Exercise: SOLID
+text = '''                  06. Reverse string
 
 
 

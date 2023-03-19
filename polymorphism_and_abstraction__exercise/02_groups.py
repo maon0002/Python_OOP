@@ -1,26 +1,17 @@
-from typing import List
-
-
 class Person:
-    def __init__(self, name: str, surname: str):
+    def __init__(self, name, surname):
         self.name = name
         self.surname = surname
 
     def __repr__(self):
-        return f"{self.name} {self.surname}"
+        return f'{self.name} {self.surname}'
 
     def __add__(self, other):
-        return f"{self.name} {other.surname}"
-
-    def __getitem__(self, index):
-        return f"Person {self.__repr__()[index]}: {self.__repr__}"
-
-    def __iter__(self, i):
-        return f"Person {self[i]}: {self}"
+        return Person(self.name, other.surname)
 
 
 class Group:
-    def __init__(self, name: str, people: List[Person]):
+    def __init__(self, name, people):
         self.name = name
         self.people = people
 
@@ -28,14 +19,20 @@ class Group:
         return len(self.people)
 
     def __add__(self, other):
-        return self.people + other.people
+        name = f'{self.name} {other.name}'
+        people = self.people + other.people
+        return Group(name, people)
 
     def __repr__(self):
-        return f"Group {self.name} with members {', '.join(str(x) for x in self.people)}"
+        members = ', '.join([str(person) for person in self.people])
+        return f'Group {self.name} with members {members}'
 
-    # def __iter__(self, i):
-    #     return f"Person {self.people[i]}: {self.people}"
+    def __getitem__(self, index):
+        return f'Person {index}: {self.people[index]}'
 
+    def __iter__(self):
+        for index, person in enumerate(self.people):
+            yield f'Person {index}: {person}'
 
 
 p0 = Person('Aliko', 'Dangote')
@@ -53,8 +50,4 @@ print(second_group)
 print(third_group[0])
 
 for person in third_group:
-    print(person)
-
-print(second_group[0])
-for person in second_group:
     print(person)
