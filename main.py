@@ -1,7 +1,7 @@
 import re
 import pyperclip
 
-text = '''                  06. Reverse string
+text = '''                  09. Possible permutations
 
 
 
