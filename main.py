@@ -1,7 +1,7 @@
 import re
 import pyperclip
 
-text = '''                  09. Possible permutations
+text = '''               Python OOP Exam - 10 December 2022
 
 
 
@@ -15,7 +15,7 @@ text = '''                  09. Possible permutations
       '''  # <<<paste here
 
 text = text.strip()
-text_chars = re.sub("[:,!/?`.&'-]", " ", text)
+text_chars = re.sub("[:,!/?`.&'*-]", " ", text)
 text_subfinal = re.sub('[ ]', '_', text_chars)
 text_subfinal = text_subfinal.replace("__", "_")
 text_final = text_subfinal.lower().strip()
