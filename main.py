@@ -1,7 +1,7 @@
 import re
 import pyperclip
 
-text = '''               Python OOP Exam - 10 December 2022
+text = '''               04. Student
 
 
 
