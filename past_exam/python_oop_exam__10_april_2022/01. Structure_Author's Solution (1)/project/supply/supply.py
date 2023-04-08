@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 
 class Supply(ABC):
-
     def __init__(self, name: str, energy: int):
         self.name = name
         self.energy = energy
@@ -13,7 +12,7 @@ class Supply(ABC):
 
     @name.setter
     def name(self, value):
-        if value == "":
+        if value == '':
             raise ValueError("Name cannot be an empty string.")
         self.__name = value
 
@@ -29,4 +28,4 @@ class Supply(ABC):
 
     @abstractmethod
     def details(self):
-        pass
+        ...

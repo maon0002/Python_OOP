@@ -1,7 +1,7 @@
 import re
 import pyperclip
 
-text = '''               Python OOP Exam - 10 April 2022
+text = '''               Python OOP Retake Exam - 23 August 2021
 
 
 
