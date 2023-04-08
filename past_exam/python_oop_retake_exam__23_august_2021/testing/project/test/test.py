@@ -77,7 +77,7 @@ class TestLibrary(TestCase):
             "Valsar": ["Title2"],
         }
         result = self.lyb.rent_book("Maon2", "Valsar", "Title")
-        self.assertEqual("Lyb1 Library does not have Valsar's Title.", result)
+        self.assertEqual('Lyb1 Library does not have Valsar\'s "Title".', result)
         # "Lyb1 Library does not have Valsar's Title."
 
     def test_when_rent_book_works_correct(self):
@@ -89,17 +89,15 @@ class TestLibrary(TestCase):
         }
         self.lyb.rent_book("Maon2", "Valsar", "Title")
 
-        self.assertEqual({
-            "Maon2": [{"Valsar": ["Title"]}]}, self.lyb.readers)
+        self.assertEqual({'Maon2': [{'Valsar': 'Title'}]}, self.lyb.readers)
 
         self.assertEqual({
             "Valsar": ["Title2"],
         }, self.lyb.books_by_authors)
 
-        self.lyb.rent_book("Maon2", "Valsar", "Title")
+        self.lyb.rent_book("Maon2", "Valsar", "Title2")
 
-        self.assertEqual({
-            "Maon2": [{"Valsar": ["Title", "Title2"]}]}, self.lyb.readers)
+        self.assertEqual({'Maon2': [{'Valsar': 'Title'}, {'Valsar': 'Title2'}]}, self.lyb.readers)
 
         self.assertEqual({
             "Valsar": [],
